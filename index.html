@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IAConcursos Pro — painel editorial</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#111a2b;
+      --panel-2:#162237;
+      --line:#25324a;
+      --muted:#8ea0bf;
+      --text:#ebf1fb;
+      --text-2:#c8d5ea;
+      --gold:#d6a74f;
+      --gold-2:#f2c979;
+      --green:#2fbb7d;
+      --red:#e16868;
+      --blue:#5aa0ff;
+      --radius:16px;
+      --shadow:0 18px 48px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#09111d,#0d1626 28%,#0b1220);color:var(--text);font:14px/1.5 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    button,input,select,textarea{font:inherit}
+    a{color:var(--blue)}
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .sidebar{position:sticky;top:0;height:100vh;background:rgba(10,17,30,.94);border-right:1px solid var(--line);padding:22px 16px 18px;backdrop-filter:blur(10px)}
+    .brand{padding:8px 10px 20px;border-bottom:1px solid var(--line);margin-bottom:18px}
+    .brand h1{margin:0;font-size:24px;letter-spacing:.2px}
+    .brand h1 span{color:var(--gold)}
+    .brand p{margin:6px 0 0;color:var(--muted);font-size:12px}
+    .nav-group{margin-bottom:18px}
+    .nav-title{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.14em;margin:0 10px 8px}
+    .nav button{width:100%;display:flex;align-items:center;gap:10px;background:transparent;color:var(--text-2);border:0;padding:11px 12px;border-radius:12px;cursor:pointer;transition:.18s}
+    .nav button:hover{background:#162238;color:var(--text)}
+    .nav button.active{background:linear-gradient(90deg,rgba(214,167,79,.18),rgba(214,167,79,.08));color:#fff;border:1px solid rgba(214,167,79,.25)}
+    .main{padding:24px 24px 40px}
+    .topbar{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}
+    .topbar-left h2{margin:0;font-size:26px}
+    .topbar-left p{margin:5px 0 0;color:var(--muted)}
+    .pill-row{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text-2);padding:8px 12px;border-radius:999px;font-size:12px}
+    .grid{display:grid;gap:18px}
+    .grid.two{grid-template-columns:1.15fr .85fr}
+    .card{background:linear-gradient(180deg,rgba(22,34,55,.96),rgba(14,23,37,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .card h3{margin:0 0 6px;font-size:18px}
+    .card-sub{color:var(--muted);margin:0 0 16px;font-size:13px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field.full{grid-column:1/-1}
+    label{font-size:12px;color:var(--muted);font-weight:600}
+    input,select,textarea{width:100%;background:#0f1829;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 13px;outline:none}
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(214,167,79,.7);box-shadow:0 0 0 4px rgba(214,167,79,.08)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{border:0;border-radius:12px;padding:11px 14px;cursor:pointer;font-weight:700;letter-spacing:.01em;transition:.18s}
+    .btn.primary{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:#20170b}
+    .btn.secondary{background:#162238;color:var(--text);border:1px solid var(--line)}
+    .btn.ghost{background:transparent;color:var(--text-2);border:1px dashed var(--line)}
+    .btn.success{background:linear-gradient(180deg,#34c886,#259f67);color:#08140f}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .suggestions{display:flex;gap:8px;flex-wrap:wrap}
+    .suggestions button{background:#0f1829;border:1px solid var(--line);color:var(--text-2);padding:8px 10px;border-radius:999px;cursor:pointer}
+    .section{display:none}
+    .section.active{display:block}
+    .status{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text-2);font-size:13px}
+    .status.ok{border-color:rgba(47,187,125,.35);background:rgba(47,187,125,.08);color:#c6f3df}
+    .status.warn{border-color:rgba(214,167,79,.32);background:rgba(214,167,79,.08);color:#f6deb0}
+    .status.err{border-color:rgba(225,104,104,.34);background:rgba(225,104,104,.08);color:#ffd5d5}
+    .article-view{display:flex;flex-direction:column;gap:14px}
+    .article-head{padding-bottom:14px;border-bottom:1px solid var(--line)}
+    .article-title{font-size:30px;line-height:1.2;margin:0 0 6px}
+    .article-sub{margin:0;color:var(--muted);font-size:15px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .chip{background:rgba(255,255,255,.05);border:1px solid var(--line);padding:7px 10px;border-radius:999px;color:var(--text-2);font-size:12px}
+    .article-body h2{font-size:22px;margin:24px 0 10px}
+    .article-body p{margin:0 0 14px;color:#e4ebf8}
+    .article-body blockquote{margin:0 0 16px;padding:14px 16px;border-left:4px solid var(--gold);background:rgba(214,167,79,.08);border-radius:0 12px 12px 0;color:#f3e1bc}
+    .faq{display:grid;gap:10px}
+    details{background:#0f1829;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+    details summary{cursor:pointer;font-weight:700}
+    .meta-list,.result-list,.history-list{display:grid;gap:12px}
+    .meta-item,.result-item,.history-item{background:#0f1829;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .result-item h4,.history-item h4{margin:0 0 6px;font-size:17px}
+    .muted{color:var(--muted)}
+    .tiny{font-size:12px}
+    .split{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .result-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .result-tags span{font-size:12px;background:rgba(214,167,79,.08);border:1px solid rgba(214,167,79,.18);color:#f6deb0;padding:6px 9px;border-radius:999px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .toolbar input,.toolbar select{max-width:230px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .stat{background:#0f1829;border:1px solid var(--line);border-radius:14px;padding:16px}
+    .stat b{display:block;font-size:28px;margin-bottom:4px}
+    .toast-wrap{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:9999}
+    .toast{min-width:260px;max-width:360px;background:#0f1829;border:1px solid var(--line);color:var(--text);padding:12px 14px;border-radius:14px;box-shadow:var(--shadow)}
+    .loading{display:inline-flex;align-items:center;gap:10px}
+    .loading::before{content:"";width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (max-width: 1100px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:relative;height:auto}
+      .grid.two,.stats{grid-template-columns:1fr}
+    }
+    @media (max-width: 720px){
+      .main{padding:18px}
+      .form-grid{grid-template-columns:1fr}
+      .article-title{font-size:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>IA<span>Concursos</span> Pro</h1>
+        <p>Painel editorial mais limpo, mais forte e mais fácil de evoluir.</p>
+      </div>
+
+      <div class="nav-group nav">
+        <div class="nav-title">Produção</div>
+        <button class="active" data-section="gerador">✍️ Gerador de artigos</button>
+        <button data-section="concursos">📋 Concursos abertos</button>
+        <button data-section="historico">🕓 Histórico</button>
+      </div>
+
+      <div class="nav-group nav">
+        <div class="nav-title">Operação</div>
+        <button data-section="wordpress">🌐 WordPress</button>
+        <button data-section="config">⚙️ Configurações</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2 id="pageTitle">Gerador de artigos</h2>
+          <p id="pageSubtitle">Produção editorial para portal de concursos com foco em SEO e publicação rápida.</p>
+        </div>
+        <div class="pill-row">
+          <div class="pill">Nicho principal: concursos públicos</div>
+          <div class="pill" id="totalArticlesPill">Artigos salvos: 0</div>
+        </div>
+      </div>
+
+      <section class="section active" id="section-gerador">
+        <div class="grid two">
+          <div class="card">
+            <h3>Gerar novo artigo</h3>
+            <p class="card-sub">Versão melhorada: menos ruído, prompt mais objetivo, resultado mais utilizável.</p>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="articleFormat">Formato</label>
+                <select id="articleFormat">
+                  <option value="edital">Edital / notícia</option>
+                  <option value="guia">Guia prático</option>
+                  <option value="analise">Análise de banca</option>
+                  <option value="ranking">Ranking / melhores concursos</option>
+                  <option value="dicas">Dicas de estudo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="articleTone">Tom</label>
+                <select id="articleTone">
+                  <option value="objetivo">Objetivo e confiável</option>
+                  <option value="didatico">Didático</option>
+                  <option value="jornalistico">Jornalístico</option>
+                  <option value="tecnico">Técnico</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="articleAudience">Público</label>
+                <select id="articleAudience">
+                  <option value="geral">Concurseiros em geral</option>
+                  <option value="iniciante">Iniciantes</option>
+                  <option value="nivel medio">Nível médio</option>
+                  <option value="nivel superior">Nível superior</option>
+                  <option value="areas policiais">Áreas policiais</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="articleMode">Modo</label>
+                <select id="articleMode">
+                  <option value="completo">Completo com web search</option>
+                  <option value="rapido">Rápido sem web search</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="articleTheme">Tema do artigo</label>
+                <textarea id="articleTheme" placeholder="Ex: Concurso INSS 2026: edital previsto, salários, cargos e como se preparar"></textarea>
+              </div>
+            </div>
+
+            <div class="field" style="margin-top:14px">
+              <label>Sugestões</label>
+              <div class="suggestions" id="themeSuggestions"></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="generateArticleBtn">Gerar artigo</button>
+              <button class="btn secondary" id="copyArticleBtn" disabled>Copiar artigo</button>
+              <button class="btn success" id="saveArticleBtn" disabled>Salvar no histórico</button>
+            </div>
+
+            <div id="articleStatus" class="status" style="margin-top:14px">Pronto para gerar.</div>
+          </div>
+
+          <div class="card">
+            <h3>Diagnóstico do que foi melhorado</h3>
+            <p class="card-sub">Principais correções em relação ao arquivo anterior.</p>
+            <div class="meta-list">
+              <div class="meta-item"><strong>Arquitetura mais limpa</strong><div class="muted tiny">Separação clara entre estado, UI, API e renderização.</div></div>
+              <div class="meta-item"><strong>Sem IDs duplicados</strong><div class="muted tiny">Evita bugs silenciosos em botões de publicação.</div></div>
+              <div class="meta-item"><strong>Prompt editorial mais forte</strong><div class="muted tiny">Retorno em JSON controlado, com SEO, FAQ e fontes.</div></div>
+              <div class="meta-item"><strong>Busca de concursos mais objetiva</strong><div class="muted tiny">Fluxo dedicado e cards mais legíveis para aproveitamento rápido.</div></div>
+              <div class="meta-item"><strong>WordPress simplificado</strong><div class="muted tiny">Publicação do artigo atual com conteúdo tratado.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px">
+          <div class="article-view" id="articleOutputEmpty">
+            <h3>Resultado</h3>
+            <p class="card-sub">O artigo gerado aparece aqui com blocos de SEO, FAQ e fontes.</p>
+            <div class="status warn">Nenhum artigo gerado ainda.</div>
+          </div>
+          <div id="articleOutput" style="display:none"></div>
+        </div>
+      </section>
+
+      <section class="section" id="section-concursos">
+        <div class="card">
+          <h3>Concursos abertos</h3>
+          <p class="card-sub">Busca orientada por IA para encontrar editais e oportunidades atuais.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="searchSphere">Esfera</label>
+              <select id="searchSphere">
+                <option value="todas">Todas</option>
+                <option value="federal">Federal</option>
+                <option value="estadual">Estadual</option>
+                <option value="municipal">Municipal</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="searchState">Estado</label>
+              <select id="searchState">
+                <option value="todos">Todos</option>
+                <option value="AC">AC</option><option value="AL">AL</option><option value="AM">AM</option><option value="AP">AP</option>
+                <option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option>
+                <option value="GO">GO</option><option value="MA">MA</option><option value="MG">MG</option><option value="MS">MS</option>
+                <option value="MT">MT</option><option value="PA">PA</option><option value="PB">PB</option><option value="PE">PE</option>
+                <option value="PI">PI</option><option value="PR">PR</option><option value="RJ">RJ</option><option value="RN">RN</option>
+                <option value="RO">RO</option><option value="RR">RR</option><option value="RS">RS</option><option value="SC">SC</option>
+                <option value="SE">SE</option><option value="SP">SP</option><option value="TO">TO</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="searchArea">Área</label>
+              <select id="searchArea">
+                <option value="todas">Todas</option>
+                <option value="administrativa">Administrativa</option>
+                <option value="policial">Policial</option>
+                <option value="fiscal">Fiscal</option>
+                <option value="tribunais">Tribunais</option>
+                <option value="saude">Saúde</option>
+                <option value="educacao">Educação</option>
+                <option value="ti">TI</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="searchDeadline">Prazo</label>
+              <select id="searchDeadline">
+                <option value="qualquer">Qualquer prazo</option>
+                <option value="7">Encerra em até 7 dias</option>
+                <option value="15">Encerra em até 15 dias</option>
+                <option value="30">Encerra em até 30 dias</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="searchContestsBtn">Buscar concursos</button>
+          </div>
+          <div id="contestStatus" class="status" style="margin-top:14px">Defina os filtros e execute a busca.</div>
+        </div>
+
+        <div class="card" style="margin-top:18px">
+          <div class="split" style="margin-bottom:12px">
+            <div>
+              <h3 style="margin-bottom:4px">Resultados</h3>
+              <div class="muted tiny" id="contestResultMeta">Nenhuma busca executada.</div>
+            </div>
+          </div>
+          <div class="result-list" id="contestResults"></div>
+        </div>
+      </section>
+
+      <section class="section" id="section-historico">
+        <div class="card">
+          <div class="split" style="margin-bottom:14px">
+            <div>
+              <h3>Histórico</h3>
+              <p class="card-sub">Artigos já gerados e salvos neste navegador.</p>
+            </div>
+            <div class="toolbar">
+              <input type="text" id="historySearch" placeholder="Buscar por título" />
+              <button class="btn ghost" id="clearHistoryBtn">Limpar histórico</button>
+            </div>
+          </div>
+
+          <div class="stats" style="margin-bottom:18px">
+            <div class="stat"><b id="statTotal">0</b><span class="muted tiny">Artigos salvos</span></div>
+            <div class="stat"><b id="statWeek">0</b><span class="muted tiny">Últimos 7 dias</span></div>
+            <div class="stat"><b id="statAvgWords">0</b><span class="muted tiny">Palavras médias</span></div>
+            <div class="stat"><b id="statFormats">0</b><span class="muted tiny">Formatos usados</span></div>
+          </div>
+
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </section>
+
+      <section class="section" id="section-wordpress">
+        <div class="card">
+          <h3>Integração com WordPress</h3>
+          <p class="card-sub">Publica o artigo atual via API REST do WordPress.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="wpUrl">URL do site</label>
+              <input id="wpUrl" type="url" placeholder="https://seusite.com.br" />
+            </div>
+            <div class="field">
+              <label for="wpUser">Usuário</label>
+              <input id="wpUser" type="text" placeholder="admin" />
+            </div>
+            <div class="field">
+              <label for="wpPass">Application Password</label>
+              <input id="wpPass" type="password" placeholder="xxxx xxxx xxxx xxxx" />
+            </div>
+            <div class="field">
+              <label for="wpStatus">Status</label>
+              <select id="wpStatus">
+                <option value="draft">Rascunho</option>
+                <option value="publish">Publicar</option>
+                <option value="pending">Pendente</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn secondary" id="testWpBtn">Testar conexão</button>
+            <button class="btn success" id="publishWpBtn">Publicar artigo atual</button>
+          </div>
+          <div id="wpStatusBox" class="status" style="margin-top:14px">Configure os dados do WordPress.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-config">
+        <div class="card">
+          <h3>Configurações</h3>
+          <p class="card-sub">Chaves e preferências do painel.</p>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="providerMode">Modo de conexão</label>
+              <select id="providerMode">
+                <option value="browser">Direto do navegador</option>
+                <option value="proxy">Via proxy próprio</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="anthropicKey">Anthropic API Key</label>
+              <input id="anthropicKey" type="password" placeholder="sk-ant-api03-..." />
+            </div>
+            <div class="field full">
+              <label for="proxyEndpoint">Proxy endpoint</label>
+              <input id="proxyEndpoint" type="url" placeholder="https://seuproxy.com/api/anthropic" />
+            </div>
+            <div class="field">
+              <label for="siteName">Nome do site</label>
+              <input id="siteName" type="text" placeholder="IAConcursos" />
+            </div>
+            <div class="field">
+              <label for="defaultAuthor">Crédito editorial</label>
+              <input id="defaultAuthor" type="text" placeholder="Redação IAConcursos" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="saveConfigBtn">Salvar configurações</button>
+            <button class="btn secondary" id="testAnthropicBtn">Testar Anthropic</button>
+          </div>
+          <div id="configStatus" class="status warn" style="margin-top:14px">No modo navegador, sua chave fica exposta ao cliente. O ideal é usar proxy próprio.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const storage = {
+      get(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    };
+
+    const state = {
+      currentArticle: null,
+      history: storage.get('iac_pro_history', []),
+      config: storage.get('iac_pro_config', {
+        providerMode: 'browser',
+        anthropicKey: '',
+        proxyEndpoint: '',
+        siteName: 'IAConcursos',
+        defaultAuthor: 'Redação IAConcursos',
+        wpUrl: '',
+        wpUser: '',
+        wpPass: '',
+        wpStatus: 'draft'
+      })
+    };
+
+    const els = {
+      navButtons: [...document.querySelectorAll('.nav button')],
+      sections: [...document.querySelectorAll('.section')],
+      pageTitle: document.getElementById('pageTitle'),
+      pageSubtitle: document.getElementById('pageSubtitle'),
+      totalArticlesPill: document.getElementById('totalArticlesPill'),
+      articleTheme: document.getElementById('articleTheme'),
+      articleFormat: document.getElementById('articleFormat'),
+      articleTone: document.getElementById('articleTone'),
+      articleAudience: document.getElementById('articleAudience'),
+      articleMode: document.getElementById('articleMode'),
+      articleStatus: document.getElementById('articleStatus'),
+      articleOutput: document.getElementById('articleOutput'),
+      articleOutputEmpty: document.getElementById('articleOutputEmpty'),
+      generateArticleBtn: document.getElementById('generateArticleBtn'),
+      copyArticleBtn: document.getElementById('copyArticleBtn'),
+      saveArticleBtn: document.getElementById('saveArticleBtn'),
+      searchContestsBtn: document.getElementById('searchContestsBtn'),
+      contestStatus: document.getElementById('contestStatus'),
+      contestResults: document.getElementById('contestResults'),
+      contestResultMeta: document.getElementById('contestResultMeta'),
+      historySearch: document.getElementById('historySearch'),
+      historyList: document.getElementById('historyList'),
+      statTotal: document.getElementById('statTotal'),
+      statWeek: document.getElementById('statWeek'),
+      statAvgWords: document.getElementById('statAvgWords'),
+      statFormats: document.getElementById('statFormats'),
+      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+      themeSuggestions: document.getElementById('themeSuggestions'),
+      providerMode: document.getElementById('providerMode'),
+      anthropicKey: document.getElementById('anthropicKey'),
+      proxyEndpoint: document.getElementById('proxyEndpoint'),
+      siteName: document.getElementById('siteName'),
+      defaultAuthor: document.getElementById('defaultAuthor'),
+      saveConfigBtn: document.getElementById('saveConfigBtn'),
+      testAnthropicBtn: document.getElementById('testAnthropicBtn'),
+      configStatus: document.getElementById('configStatus'),
+      wpUrl: document.getElementById('wpUrl'),
+      wpUser: document.getElementById('wpUser'),
+      wpPass: document.getElementById('wpPass'),
+      wpStatus: document.getElementById('wpStatus'),
+      testWpBtn: document.getElementById('testWpBtn'),
+      publishWpBtn: document.getElementById('publishWpBtn'),
+      wpStatusBox: document.getElementById('wpStatusBox'),
+      toastWrap: document.getElementById('toastWrap')
+    };
+
+    const sectionMeta = {
+      gerador: ['Gerador de artigos', 'Produção editorial para portal de concursos com foco em SEO e publicação rápida.'],
+      concursos: ['Concursos abertos', 'Busca assistida para localizar editais, vagas, salários e prazos mais recentes.'],
+      historico: ['Histórico', 'Controle do que já foi produzido neste navegador.'],
+      wordpress: ['WordPress', 'Conexão direta para publicar artigos no seu portal.'],
+      config: ['Configurações', 'Chaves, proxy e preferências operacionais do painel.']
+    };
+
+    const suggestions = [
+      'Concurso INSS 2026: edital previsto, cargos, salários e preparação',
+      'Concurso Banco do Brasil 2026: o que já se sabe e como estudar',
+      'Concursos federais mais promissores para nível médio em 2026',
+      'Como estudar para o Cebraspe sem desperdiçar tempo',
+      'Ranking dos concursos com melhores salários abertos agora'
+    ];
+
+    function toast(message, type = 'default') {
+      const div = document.createElement('div');
+      div.className = 'toast';
+      div.style.borderColor = type === 'ok' ? 'rgba(47,187,125,.35)' : type === 'err' ? 'rgba(225,104,104,.34)' : 'var(--line)';
+      div.innerHTML = message;
+      els.toastWrap.appendChild(div);
+      setTimeout(() => div.remove(), 3200);
+    }
+
+    function setStatus(el, text, variant = 'default') {
+      el.className = 'status' + (variant ? ' ' + variant : '');
+      el.innerHTML = text;
+    }
+
+    function switchSection(sectionName) {
+      els.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.section === sectionName));
+      els.sections.forEach(sec => sec.classList.toggle('active', sec.id === 'section-' + sectionName));
+      const meta = sectionMeta[sectionName];
+      if (meta) {
+        els.pageTitle.textContent = meta[0];
+        els.pageSubtitle.textContent = meta[1];
+      }
+    }
+
+    function saveConfig() {
+      state.config = {
+        ...state.config,
+        providerMode: els.providerMode.value,
+        anthropicKey: els.anthropicKey.value.trim(),
+        proxyEndpoint: els.proxyEndpoint.value.trim(),
+        siteName: els.siteName.value.trim() || 'IAConcursos',
+        defaultAuthor: els.defaultAuthor.value.trim() || 'Redação IAConcursos',
+        wpUrl: els.wpUrl.value.trim(),
+        wpUser: els.wpUser.value.trim(),
+        wpPass: els.wpPass.value.trim(),
+        wpStatus: els.wpStatus.value
+      };
+      storage.set('iac_pro_config', state.config);
+      setStatus(els.configStatus, 'Configurações salvas com sucesso.', 'ok');
+      toast('Configurações salvas.', 'ok');
+    }
+
+    function loadConfigToForm() {
+      els.providerMode.value = state.config.providerMode;
+      els.anthropicKey.value = state.config.anthropicKey;
+      els.proxyEndpoint.value = state.config.proxyEndpoint;
+      els.siteName.value = state.config.siteName;
+      els.defaultAuthor.value = state.config.defaultAuthor;
+      els.wpUrl.value = state.config.wpUrl;
+      els.wpUser.value = state.config.wpUser;
+      els.wpPass.value = state.config.wpPass;
+      els.wpStatus.value = state.config.wpStatus;
+    }
+
+    function buildHeaders() {
+      if (state.config.providerMode === 'browser') {
+        if (!state.config.anthropicKey) throw new Error('Configure sua Anthropic API Key primeiro.');
+        return {
+          endpoint: 'https://api.anthropic.com/v1/messages',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': state.config.anthropicKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          }
+        };
+      }
+      if (!state.config.proxyEndpoint) throw new Error('Defina o endpoint do proxy primeiro.');
+      return {
+        endpoint: state.config.proxyEndpoint,
+        headers: { 'Content-Type': 'application/json' }
+      };
+    }
+
+    function extractTextFromClaude(data) {
+      return (data.content || []).filter(item => item.type === 'text').map(item => item.text).join('\n').trim();
+    }
+
+    function extractJson(raw) {
+      const cleaned = String(raw || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+      let best = null;
+      let depth = 0;
+      let start = -1;
+      for (let i = 0; i < cleaned.length; i++) {
+        const char = cleaned[i];
+        if (char === '{') {
+          if (depth === 0) start = i;
+          depth++;
+        } else if (char === '}') {
+          depth--;
+          if (depth === 0 && start !== -1) {
+            const candidate = cleaned.slice(start, i + 1);
+            try {
+              best = JSON.parse(candidate);
+            } catch {}
+            start = -1;
+          }
+        }
+      }
+      if (best) return best;
+      return JSON.parse(cleaned);
+    }
+
+    async function callClaude({ system, prompt, maxTokens = 5000, tools = [] }) {
+      const { endpoint, headers } = buildHeaders();
+      const body = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: maxTokens,
+        system,
+        messages: [{ role: 'user', content: prompt }]
+      };
+      if (tools.length) body.tools = tools;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data?.error?.message || 'Falha na comunicação com a API.');
+      }
+      return data;
+    }
+
+    function markdownToHtml(text) {
+      const safe = String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(.*?)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+      return safe
+        .split(/\n\n+/)
+        .filter(Boolean)
+        .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+        .join('');
+    }
+
+    function countWordsFromArticle(article) {
+      const text = [article.lide || '', ...(article.secoes || []).map(s => s.conteudo || '')].join(' ');
+      return text.trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function renderArticle(article) {
+      const words = countWordsFromArticle(article);
+      const sourceHtml = (article.fontes || []).length
+        ? `<div class="card" style="padding:14px;margin-top:8px"><h3 style="font-size:16px">Fontes</h3><div class="meta-list">${article.fontes.map(f => `<div class="meta-item"><strong>${f.nome || 'Fonte'}</strong><div class="tiny muted">${f.descricao || ''}</div><div class="tiny"><a href="${f.url}" target="_blank" rel="noopener">${f.url}</a></div></div>`).join('')}</div></div>`
+        : '';
+
+      const faqHtml = (article.faq || []).length
+        ? `<div class="faq">${article.faq.map(item => `<details><summary>${item.pergunta}</summary><div class="muted" style="margin-top:10px">${item.resposta}</div></details>`).join('')}</div>`
+        : '<div class="status warn">Sem FAQ retornado.</div>';
+
+      const seoHtml = article.seo
+        ? `<div class="meta-list">
+            <div class="meta-item"><strong>Meta description</strong><div class="tiny muted">${article.seo.meta_desc || '—'}</div></div>
+            <div class="meta-item"><strong>Título alternativo</strong><div class="tiny muted">${article.seo.titulo_alternativo || '—'}</div></div>
+            <div class="meta-item"><strong>Keywords</strong><div class="tiny muted">${(article.seo.keywords || []).join(', ') || '—'}</div></div>
+          </div>`
+        : '<div class="status warn">Sem bloco de SEO retornado.</div>';
+
+      els.articleOutputEmpty.style.display = 'none';
+      els.articleOutput.style.display = 'block';
+      els.articleOutput.innerHTML = `
+        <div class="article-view">
+          <div class="article-head">
+            <h1 class="article-title">${article.titulo || 'Sem título'}</h1>
+            <p class="article-sub">${article.subtitulo || ''}</p>
+            <div class="chips">
+              <span class="chip">${article.tempo_leitura || '—'} de leitura</span>
+              <span class="chip">${words} palavras</span>
+              <span class="chip">${article.formato_exibicao || article.formato || 'conteúdo editorial'}</span>
+            </div>
+          </div>
+
+          ${article.lide ? `<blockquote>${article.lide}</blockquote>` : ''}
+
+          <div class="article-body">
+            ${(article.secoes || []).map(sec => `<section><h2>${sec.titulo || 'Seção'}</h2>${markdownToHtml(sec.conteudo || '')}</section>`).join('')}
+          </div>
+
+          <div class="grid two">
+            <div class="card" style="padding:14px">
+              <h3 style="font-size:16px">FAQ</h3>
+              ${faqHtml}
+            </div>
+            <div class="card" style="padding:14px">
+              <h3 style="font-size:16px">SEO</h3>
+              ${seoHtml}
+            </div>
+          </div>
+
+          ${sourceHtml}
+        </div>
+      `;
+
+      els.copyArticleBtn.disabled = false;
+      els.saveArticleBtn.disabled = false;
+    }
+
+    function buildArticlePrompt() {
+      const today = new Date().toLocaleDateString('pt-BR', { dateStyle: 'full' });
+      const format = els.articleFormat.value;
+      const tone = els.articleTone.value;
+      const audience = els.articleAudience.value;
+      const theme = els.articleTheme.value.trim();
+
+      return `Hoje é ${today}. Você é um redator sênior especializado em concursos públicos no Brasil.
+Escreva um artigo em português do Brasil para portal editorial de concursos.
+
+Regras:
+- Linguagem clara, humana, direta e confiável.
+- Nada de frases genéricas de IA.
+- Priorize dados concretos, úteis e acionáveis.
+- Se houver datas, salários, vagas ou banca, use informações atuais e consistentes.
+- Produza conteúdo com boa estrutura para SEO.
+- Use sentence case nos títulos.
+
+Contexto do artigo:
+- Formato: ${format}
+- Tom: ${tone}
+- Público: ${audience}
+- Tema: ${theme}
+
+Responda APENAS em JSON válido com esta estrutura:
+{
+  "titulo":"",
+  "subtitulo":"",
+  "tempo_leitura":"",
+  "formato":"${format}",
+  "formato_exibicao":"",
+  "lide":"",
+  "secoes":[
+    {"titulo":"","conteudo":""}
+  ],
+  "fontes":[{"nome":"","url":"","descricao":""}],
+  "faq":[{"pergunta":"","resposta":""}],
+  "seo":{"meta_desc":"","titulo_alternativo":"","keywords":[""]}
+}`;
+    }
+
+    async function generateArticle() {
+      try {
+        const theme = els.articleTheme.value.trim();
+        if (!theme) {
+          setStatus(els.articleStatus, 'Informe o tema do artigo.', 'warn');
+          return;
+        }
+        els.generateArticleBtn.disabled = true;
+        setStatus(els.articleStatus, '<span class="loading">Gerando artigo...</span>', 'warn');
+
+        const tools = els.articleMode.value === 'completo'
+          ? [{ type: 'web_search_20250305', name: 'web_search', allowed_callers: ['direct'] }]
+          : [];
+
+        const data = await callClaude({
+          system: 'Você é um gerador editorial confiável. Sua resposta final deve ser APENAS JSON válido.',
+          prompt: buildArticlePrompt(),
+          maxTokens: 6500,
+          tools
+        });
+
+        const raw = extractTextFromClaude(data);
+        const article = extractJson(raw);
+        state.currentArticle = article;
+        renderArticle(article);
+        setStatus(els.articleStatus, 'Artigo gerado com sucesso.', 'ok');
+        toast('Artigo gerado.', 'ok');
+      } catch (error) {
+        setStatus(els.articleStatus, 'Erro ao gerar artigo: ' + error.message, 'err');
+        toast('Falha ao gerar artigo.', 'err');
+      } finally {
+        els.generateArticleBtn.disabled = false;
+      }
+    }
+
+    function copyCurrentArticle() {
+      if (!state.currentArticle) return;
+      const article = state.currentArticle;
+      const text = [
+        article.titulo || '',
+        article.subtitulo || '',
+        article.lide || '',
+        ...(article.secoes || []).flatMap(sec => [sec.titulo || '', sec.conteudo || ''])
+      ].join('\n\n');
+      navigator.clipboard.writeText(text).then(() => toast('Artigo copiado.', 'ok'));
+    }
+
+    function saveCurrentArticle() {
+      if (!state.currentArticle) return;
+      const article = structuredClone(state.currentArticle);
+      article._savedAt = new Date().toISOString();
+      article._wordCount = countWordsFromArticle(article);
+      state.history.unshift(article);
+      storage.set('iac_pro_history', state.history);
+      renderHistory();
+      updateHeaderStats();
+      toast('Artigo salvo no histórico.', 'ok');
+    }
+
+    function renderHistory() {
+      const query = els.historySearch.value.trim().toLowerCase();
+      const filtered = state.history.filter(item => (item.titulo || '').toLowerCase().includes(query));
+      const now = Date.now();
+      const recent = state.history.filter(item => now - new Date(item._savedAt).getTime() <= 7 * 86400000);
+      const avg = state.history.length ? Math.round(state.history.reduce((acc, item) => acc + (item._wordCount || 0), 0) / state.history.length) : 0;
+      const formats = new Set(state.history.map(item => item.formato || item.formato_exibicao || 'geral'));
+
+      els.statTotal.textContent = state.history.length;
+      els.statWeek.textContent = recent.length;
+      els.statAvgWords.textContent = avg;
+      els.statFormats.textContent = formats.size;
+
+      if (!filtered.length) {
+        els.historyList.innerHTML = '<div class="status warn">Nenhum artigo encontrado.</div>';
+        return;
+      }
+
+      els.historyList.innerHTML = filtered.map((item, idx) => `
+        <div class="history-item">
+          <div class="split">
+            <div>
+              <h4>${item.titulo || 'Sem título'}</h4>
+              <div class="muted tiny">${item.subtitulo || ''}</div>
+            </div>
+            <div class="chips">
+              <span class="chip">${item._wordCount || 0} palavras</span>
+              <span class="chip">${new Date(item._savedAt).toLocaleDateString('pt-BR')}</span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn secondary" data-history-open="${idx}">Abrir</button>
+            <button class="btn ghost" data-history-delete="${idx}">Excluir</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('[data-history-open]').forEach(btn => {
+        btn.onclick = () => {
+          const item = filtered[Number(btn.dataset.historyOpen)];
+          state.currentArticle = item;
+          renderArticle(item);
+          switchSection('gerador');
+          toast('Artigo carregado do histórico.', 'ok');
+        };
+      });
+
+      document.querySelectorAll('[data-history-delete]').forEach(btn => {
+        btn.onclick = () => {
+          const item = filtered[Number(btn.dataset.historyDelete)];
+          state.history = state.history.filter(entry => entry._savedAt !== item._savedAt);
+          storage.set('iac_pro_history', state.history);
+          renderHistory();
+          updateHeaderStats();
+          toast('Artigo removido.', 'ok');
+        };
+      });
+    }
+
+    function updateHeaderStats() {
+      els.totalArticlesPill.textContent = 'Artigos salvos: ' + state.history.length;
+    }
+
+    function clearHistory() {
+      if (!confirm('Deseja limpar todo o histórico?')) return;
+      state.history = [];
+      storage.set('iac_pro_history', state.history);
+      renderHistory();
+      updateHeaderStats();
+      toast('Histórico limpo.', 'ok');
+    }
+
+    function contestPrompt() {
+      const sphere = document.getElementById('searchSphere').value;
+      const stateUf = document.getElementById('searchState').value;
+      const area = document.getElementById('searchArea').value;
+      const deadline = document.getElementById('searchDeadline').value;
+      const today = new Date().toLocaleDateString('pt-BR', { dateStyle: 'full' });
+
+      return `Hoje é ${today}. Pesquise concursos públicos brasileiros com inscrições abertas ou muito recentes.
+Filtros:
+- Esfera: ${sphere}
+- Estado: ${stateUf}
+- Área: ${area}
+- Prazo: ${deadline === 'qualquer' ? 'qualquer prazo' : 'encerra em até ' + deadline + ' dias'}
+
+Retorne APENAS JSON válido:
+{
+  "concursos":[
+    {
+      "orgao":"",
+      "cargo":"",
+      "esfera":"",
+      "estado":"",
+      "vagas":"",
+      "salario":"",
+      "banca":"",
+      "inscricao_fim":"",
+      "fonte":"",
+      "resumo":""
+    }
+  ]
+}`;
+    }
+
+    async function searchContests() {
+      try {
+        els.searchContestsBtn.disabled = true;
+        setStatus(els.contestStatus, '<span class="loading">Buscando concursos...</span>', 'warn');
+        els.contestResults.innerHTML = '';
+
+        const data = await callClaude({
+          system: 'Você é um pesquisador de concursos públicos. Responda APENAS em JSON válido.',
+          prompt: contestPrompt(),
+          maxTokens: 5000,
+          tools: [{ type: 'web_search_20250305', name: 'web_search', allowed_callers: ['direct'] }]
+        });
+
+        const raw = extractTextFromClaude(data);
+        const parsed = extractJson(raw);
+        const contests = parsed.concursos || [];
+
+        if (!contests.length) {
+          setStatus(els.contestStatus, 'Nenhum concurso encontrado com esse filtro.', 'warn');
+          els.contestResultMeta.textContent = '0 resultados.';
+          return;
+        }
+
+        els.contestResultMeta.textContent = contests.length + ' resultado(s) encontrados.';
+        els.contestResults.innerHTML = contests.map((item, index) => `
+          <div class="result-item">
+            <div class="split">
+              <div>
+                <h4>${index + 1}. ${item.orgao || 'Órgão não informado'}</h4>
+                <div class="muted">${item.cargo || ''}</div>
+              </div>
+              <div class="chips">
+                <span class="chip">${item.esfera || '—'}</span>
+                <span class="chip">${item.estado || '—'}</span>
+              </div>
+            </div>
+            <p style="margin:10px 0 0">${item.resumo || ''}</p>
+            <div class="result-tags">
+              <span>Vagas: ${item.vagas || '—'}</span>
+              <span>Salário: ${item.salario || '—'}</span>
+              <span>Banca: ${item.banca || '—'}</span>
+              <span>Inscrição: ${item.inscricao_fim || '—'}</span>
+            </div>
+            ${item.fonte ? `<div class="tiny muted" style="margin-top:10px">Fonte: <a href="${item.fonte}" target="_blank" rel="noopener">${item.fonte}</a></div>` : ''}
+          </div>
+        `).join('');
+
+        setStatus(els.contestStatus, 'Busca concluída com sucesso.', 'ok');
+      } catch (error) {
+        setStatus(els.contestStatus, 'Erro ao buscar concursos: ' + error.message, 'err');
+      } finally {
+        els.searchContestsBtn.disabled = false;
+      }
+    }
+
+    function buildWordpressContent(article) {
+      const sections = (article.secoes || []).map(sec => `
+        <h2>${sec.titulo || 'Seção'}</h2>
+        ${(sec.conteudo || '').split(/\n\n+/).filter(Boolean).map(p => `<p>${p}</p>`).join('')}
+      `).join('');
+      const faq = (article.faq || []).length
+        ? `<h2>Perguntas frequentes</h2>${article.faq.map(item => `<p><strong>${item.pergunta}</strong><br>${item.resposta}</p>`).join('')}`
+        : '';
+      return `
+        <p><em>${article.subtitulo || ''}</em></p>
+        ${article.lide ? `<p><strong>${article.lide}</strong></p>` : ''}
+        ${sections}
+        ${faq}
+        <p style="font-size:12px;color:#666">${state.config.defaultAuthor || 'Redação'}</p>
+      `;
+    }
+
+    async function testWordpress() {
+      try {
+        saveConfig();
+        if (!state.config.wpUrl || !state.config.wpUser || !state.config.wpPass) {
+          throw new Error('Preencha URL, usuário e senha.');
+        }
+        setStatus(els.wpStatusBox, '<span class="loading">Testando conexão...</span>', 'warn');
+        const response = await fetch(state.config.wpUrl.replace(/\/$/, '') + '/wp-json/wp/v2/posts?per_page=1', {
+          headers: {
+            Authorization: 'Basic ' + btoa(state.config.wpUser + ':' + state.config.wpPass)
+          }
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        setStatus(els.wpStatusBox, 'Conexão com WordPress validada.', 'ok');
+      } catch (error) {
+        setStatus(els.wpStatusBox, 'Falha no WordPress: ' + error.message, 'err');
+      }
+    }
+
+    async function publishToWordpress() {
+      try {
+        saveConfig();
+        if (!state.currentArticle) throw new Error('Nenhum artigo atual para publicar.');
+        if (!state.config.wpUrl || !state.config.wpUser || !state.config.wpPass) throw new Error('Configure o WordPress primeiro.');
+        setStatus(els.wpStatusBox, '<span class="loading">Publicando...</span>', 'warn');
+        const response = await fetch(state.config.wpUrl.replace(/\/$/, '') + '/wp-json/wp/v2/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Basic ' + btoa(state.config.wpUser + ':' + state.config.wpPass)
+          },
+          body: JSON.stringify({
+            title: state.currentArticle.titulo,
+            content: buildWordpressContent(state.currentArticle),
+            excerpt: state.currentArticle.seo?.meta_desc || '',
+            status: state.config.wpStatus || 'draft'
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Erro ao publicar.');
+        setStatus(els.wpStatusBox, `Publicado com sucesso. <a href="${data.link}" target="_blank" rel="noopener">Abrir post</a>`, 'ok');
+      } catch (error) {
+        setStatus(els.wpStatusBox, 'Falha ao publicar: ' + error.message, 'err');
+      }
+    }
+
+    async function testAnthropic() {
+      try {
+        saveConfig();
+        setStatus(els.configStatus, '<span class="loading">Testando Anthropic...</span>', 'warn');
+        const data = await callClaude({
+          system: 'Responda em texto simples.',
+          prompt: 'Responda apenas com: ok',
+          maxTokens: 10
+        });
+        const text = extractTextFromClaude(data).toLowerCase();
+        if (!text.includes('ok')) throw new Error('Resposta inesperada da API.');
+        setStatus(els.configStatus, 'Anthropic conectada com sucesso.', 'ok');
+      } catch (error) {
+        setStatus(els.configStatus, 'Falha na conexão com Anthropic: ' + error.message, 'err');
+      }
+    }
+
+    function renderSuggestions() {
+      els.themeSuggestions.innerHTML = suggestions.map(item => `<button type="button">${item}</button>`).join('');
+      [...els.themeSuggestions.querySelectorAll('button')].forEach(btn => {
+        btn.onclick = () => { els.articleTheme.value = btn.textContent; };
+      });
+    }
+
+    function bindEvents() {
+      els.navButtons.forEach(btn => btn.addEventListener('click', () => switchSection(btn.dataset.section)));
+      els.generateArticleBtn.addEventListener('click', generateArticle);
+      els.copyArticleBtn.addEventListener('click', copyCurrentArticle);
+      els.saveArticleBtn.addEventListener('click', saveCurrentArticle);
+      els.searchContestsBtn.addEventListener('click', searchContests);
+      els.historySearch.addEventListener('input', renderHistory);
+      els.clearHistoryBtn.addEventListener('click', clearHistory);
+      els.saveConfigBtn.addEventListener('click', saveConfig);
+      els.testAnthropicBtn.addEventListener('click', testAnthropic);
+      els.testWpBtn.addEventListener('click', testWordpress);
+      els.publishWpBtn.addEventListener('click', publishToWordpress);
+    }
+
+    function init() {
+      loadConfigToForm();
+      renderSuggestions();
+      bindEvents();
+      renderHistory();
+      updateHeaderStats();
+    }
+
+    init();
+  </script>
+</body>
+</html>
